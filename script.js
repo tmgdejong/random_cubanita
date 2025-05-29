@@ -1,12 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const spinButton = document.getElementById('spinButton');
-    const itemDisplay = document.querySelector('.item-display');
-    const foodImageDisplay = document.getElementById('foodImage');
+    const foodWheel = document.getElementById('foodWheel'); // Get the wheel
+    const itemDisplay = foodWheel.querySelector('.item-display'); // Get the text display area within the wheel
     const selectedFoodNameDisplay = document.getElementById('selectedFoodName');
     let foodItems = [];
     let isSpinning = false;
+    let foodLoadedSuccessfully = false; // To track if food items are ready
 
-    // 1. Load food items from JSON
+    // Initial text set in HTML is "Laden..."
+
     async function loadFoodItems() {
         try {
             const response = await fetch('food.json');
@@ -14,40 +15,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             foodItems = await response.json();
+
             if (foodItems.length === 0) {
-                itemDisplay.textContent = "No food loaded!";
-                spinButton.disabled = true;
+                itemDisplay.textContent = "Geen gerechten!"; // No food available
+                foodWheel.classList.add('disabled'); // Optional: style to show it's not clickable
+                foodLoadedSuccessfully = false;
             } else {
-                itemDisplay.textContent = "¿Qué Tapa Toca Hoy?"; // Initial text
+                itemDisplay.textContent = "Klik om te draaien!"; // Default text when ready
+                foodLoadedSuccessfully = true;
+                foodWheel.classList.remove('disabled');
             }
         } catch (error) {
             console.error("Could not load food items:", error);
-            itemDisplay.textContent = "Error loading food!";
-            spinButton.disabled = true;
+            itemDisplay.textContent = "Fout bij laden!";
+            foodWheel.classList.add('disabled');
+            foodLoadedSuccessfully = false;
         }
     }
 
-    // 2. Spin function
     function spin() {
-        if (isSpinning || foodItems.length === 0) {
+        // Prevent spinning if already spinning, or if food hasn't loaded, or no food items
+        if (isSpinning || !foodLoadedSuccessfully || foodItems.length === 0) {
             return;
         }
         isSpinning = true;
-        spinButton.disabled = true;
-        itemDisplay.classList.add('spinning');
+        foodWheel.classList.add('disabled'); // Disable clicking during spin
+        itemDisplay.classList.add('spinning'); // Visual spinning effect for text
         selectedFoodNameDisplay.textContent = ""; // Clear previous selection name
-        foodImageDisplay.style.display = 'none'; // Hide previous image
 
-
-        let spinDuration = 2000; // Total spin time in milliseconds (e.g., 2 seconds)
-        let spinInterval = 100; // How often to change the displayed item during spin (ms)
+        let spinDuration = 2000;
+        let spinInterval = 100;
         let cycles = spinDuration / spinInterval;
         let currentCycle = 0;
 
         const spinEffect = setInterval(() => {
             const randomIndex = Math.floor(Math.random() * foodItems.length);
             const randomFood = foodItems[randomIndex];
-            itemDisplay.textContent = randomFood.name.substring(0, 15) + (randomFood.name.length > 15 ? '...' : ''); // Show part of the name
+            // Truncate long names during spinning for better visual
+            itemDisplay.textContent = randomFood.name.substring(0, 18) + (randomFood.name.length > 18 ? '...' : '');
             currentCycle++;
 
             if (currentCycle >= cycles) {
@@ -57,42 +62,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }, spinInterval);
     }
 
-    // 3. Select the final item
     function selectFinalItem() {
         const randomIndex = Math.floor(Math.random() * foodItems.length);
         const selectedFood = foodItems[randomIndex];
-
-        // Inside selectFinalItem function, after getting selectedFood:
-        itemDisplay.textContent = selectedFood.name;
-        selectedFoodNameDisplay.textContent = `¡A pedir: ${selectedFood.name} (${selectedFood.category})!`;
-
 
         itemDisplay.classList.remove('spinning');
         itemDisplay.style.opacity = 0; // Fade out old text
 
         setTimeout(() => {
-            itemDisplay.textContent = selectedFood.name;
+            itemDisplay.textContent = selectedFood.name; // Display full name of selected item
             itemDisplay.style.opacity = 1; // Fade in new text
 
-            selectedFoodNameDisplay.textContent = `¡A pedir: ${selectedFood.name}!`;
-
-            if (selectedFood.image) {
-                foodImageDisplay.src = selectedFood.image;
-                foodImageDisplay.alt = selectedFood.name;
-                foodImageDisplay.style.display = 'block';
+            if (selectedFood.category) {
+                 selectedFoodNameDisplay.textContent = `¡A pedir: ${selectedFood.name} (${selectedFood.category})!`;
             } else {
-                foodImageDisplay.style.display = 'none';
+                 selectedFoodNameDisplay.textContent = `¡A pedir: ${selectedFood.name}!`;
             }
 
             isSpinning = false;
-            spinButton.disabled = false;
+            if (foodLoadedSuccessfully && foodItems.length > 0) {
+                foodWheel.classList.remove('disabled'); // Re-enable clicking
+                // After a spin, you might want to revert to "Klik om te draaien!" or keep the last result.
+                // For now, it keeps the last result. If you want to revert:
+                // setTimeout(() => { itemDisplay.textContent = "Klik om te draaien!"; }, 2000); // Example delay
+            }
         }, 300); // Short delay for text transition
     }
 
-    // Event Listener for the spin button
-    spinButton.addEventListener('click', spin);
+    // Event Listener for the wheel
+    foodWheel.addEventListener('click', spin);
 
     // Initial load of food items
     loadFoodItems();
 });
-
