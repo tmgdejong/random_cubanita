@@ -280,7 +280,7 @@ function createFallingTaco() {
         itemDisplay.style.opacity = 0;
 
         setTimeout(() => {
-            itemDisplay.textContent = selectedFood.name;
+            itemDisplay.textContent = `${selectedFood.name} (${selectedFood.category})`;
             itemDisplay.style.opacity = 1;
 
             // --- TRIGGER TACO RAIN HERE! ---
