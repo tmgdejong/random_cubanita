@@ -24,40 +24,44 @@ h1 {
 }
 
 .slot-machine {
-    margin-bottom: 30px; /* Or adjust as needed after button removal */
+    /* margin-bottom: 30px; /* Adjusted if needed, but primarily for space above where the button was */
     perspective: 1000px;
 }
 
 .wheel {
-    width: 300px;
-    max-width: 90%;
-    height: 100px;
+    /* Increased size */
+    width: 450px;  /* Example: Increased from 300px */
+    max-width: 95%; /* Ensure it's responsive */
+    height: 120px; /* Example: Increased from 100px */
     background-color: #f77f00;
     border: 4px solid #003049;
     border-radius: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
+    overflow: hidden; /* Important to hide parts of text that might overflow during spin */
     margin-left: auto;
     margin-right: auto;
-    margin-bottom: 20px; /* Adjusted spacing after button removal */
+    margin-bottom: 20px;
     box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
-    cursor: pointer; /* Make it look clickable */
-    user-select: none; /* Prevent text selection on click */
+    cursor: pointer;
+    user-select: none;
 }
 
-.wheel.disabled { /* Optional: style for when the wheel shouldn't be spun */
+.wheel.disabled {
     cursor: not-allowed;
     opacity: 0.7;
 }
 
 .item-display {
-    font-size: 1.8em;
+    font-size: 1.8em; /* This can be adjusted if needed, e.g., 2em or 2.2em */
     font-weight: bold;
     color: white;
-    padding: 10px;
+    padding: 10px 15px; /* Added a bit more horizontal padding */
     text-align: center;
+    white-space: nowrap; /* Prevent text from wrapping to a new line */
+    overflow: hidden;    /* Hide text that doesn't fit */
+    text-overflow: ellipsis; /* Add ellipsis (...) if text still overflows the width */
     transition: transform 0.3s ease-out, opacity 0.3s ease-out;
 }
 
@@ -65,15 +69,7 @@ h1 {
     display: none;
 }
 
-/* Styles for #spinButton removed */
-
-.selected-food-name {
-    margin-top: 20px;
-    font-size: 1.5em;
-    color: #003049;
-    font-weight: bold;
-    min-height: 30px;
-}
+/* .selected-food-name styles removed */
 
 .spinning {
     animation: spinAnimation 0.1s linear infinite;
@@ -84,3 +80,127 @@ h1 {
     50% { transform: translateY(0px); opacity: 1; }
     100% { transform: translateY(20px); opacity: 0.5; }
 }
+/* Add these new styles, and adjust existing ones if needed */
+
+body {
+    font-family: 'Arial', sans-serif;
+    /* ... existing body styles ... */
+    position: relative; /* For positioning the gear icon */
+}
+
+.settings-gear {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2.5em; /* Adjust size as needed */
+    cursor: pointer;
+    z-index: 1001; /* Ensure it's above other content if needed */
+    color: #003049; /* Match other accent colors */
+}
+
+.container {
+    /* ... existing container styles ... */
+    margin-top: 60px; /* Add some space below the gear icon area */
+}
+
+.wheel {
+    width: 450px;
+    max-width: 95%;
+    height: 120px;
+    /* ... existing wheel styles ... */
+}
+
+.item-display {
+    font-size: 1.8em;
+    /* ... existing item-display styles ... */
+}
+
+/* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5); /* Dim background */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.show {
+    display: flex; /* Use flex to center modal content */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 25px 30px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    color: #333;
+    position: relative;
+}
+
+.close-button {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-content h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #003049;
+}
+
+#categoriesList {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+#categoriesList label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    cursor: pointer;
+}
+
+#categoriesList input[type="checkbox"] {
+    margin-right: 10px;
+    transform: scale(1.2); /* Make checkbox slightly larger */
+}
+
+.modal-button {
+    background-color: #c1121f;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1.1em;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.modal-button:hover {
+    background-color: #a00f1a;
+}
+
