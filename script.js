@@ -1,13 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
     const foodWheel = document.getElementById('foodWheel');
     const itemDisplay = foodWheel.querySelector('.item-display');
-    
+    const animationContainer = document.getElementById('animationContainer'); // Get the new container
+    const backgroundMusic = document.getElementById('backgroundMusic'); // Get the audio element
+
     // Settings Gear and Modal elements
     const settingsGear = document.getElementById('settingsGear');
     const settingsModal = document.getElementById('settingsModal');
     const closeSettingsModalButton = document.getElementById('closeSettingsModal');
     const categoriesListDiv = document.getElementById('categoriesList');
     const saveSettingsButton = document.getElementById('saveSettingsButton');
+
+    const tacoAnimations = ['fallAndRotate', 'fallAndDrift', 'simpleFall'];
+
 
     let allFoodItems = []; // All items from JSON
     let spinableItems = []; // Filtered items based on selected categories
@@ -16,6 +21,90 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isSpinning = false;
     let foodLoadedSuccessfully = false;
+
+    let musicAttemptedPlay = false;
+    let musicPlaying = false;
+
+    // Set a default volume (0.0 to 1.0)
+    if (backgroundMusic) {
+        backgroundMusic.volume = 0.3; // Adjust as desired (e.g., 30% volume)
+    }
+
+    function playBackgroundMusic() {
+        if (!backgroundMusic || musicPlaying) {
+            return;
+        }
+
+        // Try to play the music
+        backgroundMusic.play().then(() => {
+            console.log("Background music started successfully.");
+            musicPlaying = true;
+            // Remove interaction listeners once music has started
+            document.removeEventListener('click', playMusicOnFirstInteraction, true);
+            document.removeEventListener('touchstart', playMusicOnFirstInteraction, true);
+            document.removeEventListener('keydown', playMusicOnFirstInteraction, true);
+        }).catch(error => {
+            console.warn("Background music autoplay prevented:", error.name, error.message);
+            // If autoplay is prevented, musicAttemptedPlay ensures we only attach listeners once.
+            if (!musicAttemptedPlay) {
+                // Add listeners for the first user interaction to try playing again
+                console.log("Setting up listeners to play music on first user interaction.");
+                document.addEventListener('click', playMusicOnFirstInteraction, { capture: true, once: true });
+                document.addEventListener('touchstart', playMusicOnFirstInteraction, { capture: true, once: true });
+                document.addEventListener('keydown', playMusicOnFirstInteraction, { capture: true, once: true });
+            }
+        });
+        musicAttemptedPlay = true;
+    }
+
+    // This specific handler will be used for the 'once' listeners
+    function playMusicOnFirstInteraction() {
+        console.log("User interaction detected, attempting to play music.");
+        playBackgroundMusic(); // Try to play again
+    }
+
+function createFallingTaco() {
+        if (!animationContainer) return; // Safety check
+
+        const taco = document.createElement('div');
+        taco.classList.add('falling-taco');
+
+        // Random horizontal start position
+        taco.style.left = `${Math.random() * 90}vw`; // Random position across viewport width (0-90%)
+
+        // Random animation style
+        const randomAnimation = tacoAnimations[Math.floor(Math.random() * tacoAnimations.length)];
+        taco.style.animationName = randomAnimation;
+
+        // Random animation duration (e.g., 2 to 5 seconds)
+        const randomDuration = Math.random() * 3 + 2;
+        taco.style.animationDuration = `${randomDuration}s`;
+        
+        taco.style.animationTimingFunction = 'linear'; // Consistent fall speed
+        taco.style.animationFillMode = 'forwards'; // Keep final state (though it falls off screen)
+
+        animationContainer.appendChild(taco);
+
+        // Remove taco after animation (plus a small buffer)
+        taco.addEventListener('animationend', () => {
+            taco.remove();
+        });
+
+        // Fallback removal in case animationend event doesn't fire (e.g., element removed early)
+        setTimeout(() => {
+            if (taco.parentElement) {
+                taco.remove();
+            }
+        }, (randomDuration * 1000) + 500); // duration in ms + buffer
+    }
+
+    function triggerTacoRain(numberOfTacos = 12) {
+        for (let i = 0; i < numberOfTacos; i++) {
+            setTimeout(() => {
+                createFallingTaco();
+            }, i * 100); // Stagger the creation of tacos for a nicer effect
+        }
+    }
 
     // --- Settings Modal Logic ---
     settingsGear.addEventListener('click', () => {
@@ -178,10 +267,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function selectFinalItem() {
-        // Ensure spinableItems isn't empty (should be caught by spin() but good for safety)
         if (spinableItems.length === 0) {
             isSpinning = false;
-            updateSpinableItemsAndWheelText();
+            updateSpinableItemsAndWheelText(); // This function should exist from previous step
             return;
         }
 
@@ -195,8 +283,12 @@ document.addEventListener('DOMContentLoaded', () => {
             itemDisplay.textContent = selectedFood.name;
             itemDisplay.style.opacity = 1;
 
+            // --- TRIGGER TACO RAIN HERE! ---
+            triggerTacoRain(); 
+            // ---------------------------------
+
             isSpinning = false;
-            if (spinableItems.length > 0) { // Check spinableItems, not just foodLoadedSuccessfully
+            if (spinableItems.length > 0) {
                 foodWheel.classList.remove('disabled');
             } else {
                 foodWheel.classList.add('disabled');
@@ -207,4 +299,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     foodWheel.addEventListener('click', spin);
     loadFoodItems(); // Initial load
+
+
+
+    // Call to load items and potentially start music
+    loadFoodItems().then(() => {
+        // Attempt to play music after everything else is potentially set up.
+        // The user interaction listeners will handle it if autoplay is blocked.
+        playBackgroundMusic();
+    });
+
+    // Make sure event listeners for main interactive elements also try to play music if it hasn't started
+    // This is a fallback in case the general 'once' listeners on document don't cover all initial interactions desired.
+    if (foodWheel) {
+        foodWheel.addEventListener('click', () => {
+            if (!musicPlaying && backgroundMusic && backgroundMusic.paused) {
+                playBackgroundMusic();
+            }
+        }, true);
+    }
+    if (settingsGear) {
+        settingsGear.addEventListener('click', () => {
+            if (!musicPlaying && backgroundMusic && backgroundMusic.paused) {
+                playBackgroundMusic();
+            }
+        }, true);
+    }
 });

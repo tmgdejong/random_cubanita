@@ -11,16 +11,16 @@ body {
 }
 
 .container {
-    background-color: #fff;
     padding: 30px 40px;
-    border-radius: 15px;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-    border: 5px solid #c1121f;
+    border-radius: 64px;
+    max-height: 100%;
+    width: 100%;
 }
 
 h1 {
     color: #003049;
     margin-bottom: 20px;
+    margin-top: 0;
 }
 
 .slot-machine {
@@ -59,7 +59,7 @@ h1 {
     color: white;
     padding: 10px 15px; /* Added a bit more horizontal padding */
     text-align: center;
-    white-space: nowrap; /* Prevent text from wrapping to a new line */
+    white-space: wrap; /* Prevent text from wrapping to a new line */
     overflow: hidden;    /* Hide text that doesn't fit */
     text-overflow: ellipsis; /* Add ellipsis (...) if text still overflows the width */
     transition: transform 0.3s ease-out, opacity 0.3s ease-out;
@@ -92,7 +92,6 @@ body {
     position: absolute;
     top: 15px;
     right: 20px;
-    font-size: 2.5em; /* Adjust size as needed */
     cursor: pointer;
     z-index: 1001; /* Ensure it's above other content if needed */
     color: #003049; /* Match other accent colors */
@@ -204,3 +203,62 @@ body {
     background-color: #a00f1a;
 }
 
+#animationContainer {
+    position: fixed; /* Stays in place even if page scrolls (though your page might not scroll) */
+    top: 0;
+    left: 0;
+    width: 100vw; /* Full viewport width */
+    height: 100vh; /* Full viewport height */
+    pointer-events: none; /* Allows clicks to go through to elements behind it */
+    z-index: 9999;      /* Very high z-index to be on top of most things */
+    overflow: hidden;     /* Prevent scrollbars if tacos animate slightly outside bounds */
+}
+
+.falling-taco {
+    position: absolute; /* Positioned relative to #animationContainer */
+    top: -70px; /* Start above the visible screen */
+    width: 60px;  /* Adjust size of the taco image as needed */
+    height: 45px; /* Adjust size of the taco image as needed */
+    background-image: url('images/taco.png'); /* Path to your taco image */
+    background-size: contain;
+    background-repeat: no-repeat;
+    /* 'animation' property will be set by JavaScript to trigger and customize */
+    will-change: transform, opacity; /* Hint for browser performance */
+}
+
+/* Define different falling animations */
+@keyframes fallAndRotate {
+    0% {
+        transform: translateY(0vh) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(110vh) rotate(720deg); /* Fall past the bottom + some rotation */
+        opacity: 1; /* Or 0 if you want them to fade out */
+    }
+}
+
+@keyframes fallAndDrift {
+    0% {
+        transform: translateY(0vh) translateX(0px) rotate(-20deg);
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(50px) rotate(180deg);
+    }
+    100% {
+        transform: translateY(110vh) translateX(-30px) rotate(380deg);
+        opacity: 1;
+    }
+}
+
+@keyframes simpleFall {
+    0% {
+        transform: translateY(0vh) rotate(10deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(110vh) rotate(50deg);
+        opacity: 1;
+    }
+}
